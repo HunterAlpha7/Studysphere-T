@@ -10,7 +10,7 @@ import {
 } from 'react-icons/ri';
 
 export default function Sidebar() {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const location = useLocation();
 
     const menuItems = [
@@ -42,6 +42,7 @@ export default function Sidebar() {
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="text-gray-300 hover:text-white"
+                    title={isExpanded ? "Collapse menu" : "Expand menu"}
                 >
                     {isExpanded ?
                         <RiMenuFoldLine className="text-xl" /> :
@@ -57,10 +58,12 @@ export default function Sidebar() {
                         <Link
                             key={item.path}
                             to={item.path}
+                            title={!isExpanded ? item.name : ""}
                             className={`
                                 flex items-center px-4 py-3 transition-colors
                                 ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}
                                 ${isActive && item.path === '/dashboard' ? 'cursor-default pointer-events-none' : ''}
+                                ${!isExpanded ? 'justify-center' : ''}
                             `}
                         >
                             <span className="inline-flex">{item.icon}</span>

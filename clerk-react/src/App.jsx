@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
+import Contact from './pages/Contact';
 
 function ProtectedRoute({ children }) {
   return (
@@ -50,7 +51,7 @@ export default function App() {
           path="/contact"
           element={
             <ProtectedRoute>
-              <div>Contact Us (Coming Soon)</div>
+              <Contact />
             </ProtectedRoute>
           }
         />
