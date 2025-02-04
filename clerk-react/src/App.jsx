@@ -3,6 +3,7 @@ import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import Contact from './pages/Contact';
+import FocusMode from './pages/FocusMode';
 
 function ProtectedRoute({ children }) {
   return (
@@ -43,7 +44,7 @@ export default function App() {
           path="/focus-mode"
           element={
             <ProtectedRoute>
-              <div>Focus Mode (Coming Soon)</div>
+              <FocusMode />
             </ProtectedRoute>
           }
         />
