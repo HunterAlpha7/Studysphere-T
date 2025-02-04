@@ -1,14 +1,16 @@
-import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
 
 export default function App() {
   return (
-    <>
-      <Navbar />
-      <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold underline">
-          Hello world!
-        </h1>
-      </div>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/study-groups" element={<div>Study Groups (Coming Soon)</div>} />
+        <Route path="/focus-mode" element={<div>Focus Mode (Coming Soon)</div>} />
+        <Route path="/contact" element={<div>Contact Us (Coming Soon)</div>} />
+      </Routes>
+    </Router>
   );
 }
