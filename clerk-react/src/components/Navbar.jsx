@@ -1,6 +1,8 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/clerk-react";
 
 export default function Navbar() {
+    const { isLoaded } = useAuth();
+
     return (
         <nav className="bg-white border-gray-200 px-4 py-2.5 dark:bg-gray-800">
             <div className="flex flex-wrap justify-between items-center mx-auto">
@@ -23,17 +25,24 @@ export default function Navbar() {
 
                 <div className="hidden w-full md:block md:w-auto" id="navbar-default">
                     <ul className="flex flex-col p-4 mt-4 bg-gray-50 rounded-lg border border-gray-100 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-800 dark:border-gray-700">
-                        <li>
-                            <SignedOut>
-                                <SignInButton>
-                                    <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105">
-                                        Sign In
-                                    </button>
-                                </SignInButton>
-                            </SignedOut>
-                            <SignedIn>
-                                <UserButton />
-                            </SignedIn>
+                        <li className="min-w-[100px] flex justify-end">
+                            {!isLoaded ? (
+                                // Skeleton loader with same dimensions as the button
+                                <div className="bg-gray-200 dark:bg-gray-700 h-[40px] w-[80px] rounded-lg animate-pulse"></div>
+                            ) : (
+                                <>
+                                    <SignedOut>
+                                        <SignInButton>
+                                            <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105">
+                                                Sign In
+                                            </button>
+                                        </SignInButton>
+                                    </SignedOut>
+                                    <SignedIn>
+                                        <UserButton />
+                                    </SignedIn>
+                                </>
+                            )}
                         </li>
                     </ul>
                 </div>
