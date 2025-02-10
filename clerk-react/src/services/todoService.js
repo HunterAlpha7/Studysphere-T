@@ -1,4 +1,8 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL;
+
+if (!API_URL) {
+    console.error('API URL is not defined in environment variables');
+}
 
 // Helper function to ensure date is properly formatted
 const formatTodoForSubmission = (todo) => ({
@@ -10,9 +14,17 @@ export const todoService = {
     async getTodos(userId) {
         try {
             const response = await fetch(`${API_URL}/todos/${userId}`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+            // First check if the response is JSON
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("Response is not JSON");
             }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Network response was not ok');
+            }
+
             const todos = await response.json();
             return todos.map(todo => ({
                 ...todo,
