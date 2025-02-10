@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FiPlus, FiClock, FiTrash2, FiCheck } from "react-icons/fi";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { todoService } from '../services/todoService';
 
 export default function Dashboard() {
     const { user } = useUser();
@@ -12,10 +13,7 @@ export default function Dashboard() {
     const [newTodo, setNewTodo] = useState('');
     const [showAddTodo, setShowAddTodo] = useState(false);
     const [todoDeadline, setTodoDeadline] = useState(new Date());
-    const [todos, setTodos] = useState([
-        { id: 1, text: 'Complete study materials', completed: false, deadline: new Date() },
-        { id: 2, text: 'Review notes', completed: true, deadline: new Date() },
-    ]);
+    const [todos, setTodos] = useState([]);
 
     // Format date to show day and month in text
     const formatDate = (date) => {
@@ -36,31 +34,62 @@ export default function Dashboard() {
         return () => clearInterval(timer);
     }, []);
 
-    const handleAddTodo = (e) => {
-        e.preventDefault();
-        if (newTodo.trim()) {
-            setTodos([
-                ...todos,
-                {
-                    id: Date.now(),
-                    text: newTodo.trim(),
-                    completed: false,
-                    deadline: todoDeadline
+    // Fetch todos when component mounts
+    useEffect(() => {
+        const fetchTodos = async () => {
+            if (user?.id) {
+                try {
+                    const fetchedTodos = await todoService.getTodos(user.id);
+                    // Convert deadline strings to Date objects
+                    const todosWithDates = fetchedTodos.map(todo => ({
+                        ...todo,
+                        deadline: new Date(todo.deadline)
+                    }));
+                    setTodos(todosWithDates);
+                } catch (error) {
+                    console.error('Error fetching todos:', error);
                 }
-            ]);
+            }
+        };
+        fetchTodos();
+    }, [user?.id]);
+
+    const handleAddTodo = async (e) => {
+        e.preventDefault();
+        if (!newTodo.trim()) return;
+
+        try {
+            const todoData = {
+                clerkId: user.id,
+                text: newTodo.trim(),
+                deadline: todoDeadline
+            };
+            const savedTodo = await todoService.createTodo(todoData);
+            setTodos([...todos, savedTodo]);
             setNewTodo('');
             setShowAddTodo(false);
+        } catch (error) {
+            console.error('Error adding todo:', error);
         }
     };
 
-    const toggleTodo = (id) => {
-        setTodos(todos.map(todo =>
-            todo.id === id ? { ...todo, completed: !todo.completed } : todo
-        ));
+    const toggleTodo = async (id) => {
+        try {
+            const todo = todos.find(t => t._id === id);
+            const updatedTodo = await todoService.updateTodo(id, !todo.completed);
+            setTodos(todos.map(t => t._id === id ? updatedTodo : t));
+        } catch (error) {
+            console.error('Error toggling todo:', error);
+        }
     };
 
-    const deleteTodo = (id) => {
-        setTodos(todos.filter(todo => todo.id !== id));
+    const deleteTodo = async (id) => {
+        try {
+            await todoService.deleteTodo(id);
+            setTodos(todos.filter(todo => todo._id !== id));
+        } catch (error) {
+            console.error('Error deleting todo:', error);
+        }
     };
 
     const handleDateClick = (date) => {
@@ -192,12 +221,12 @@ export default function Dashboard() {
                         <div className="space-y-2 max-h-[300px] overflow-y-auto">
                             {todos.map(todo => (
                                 <div
-                                    key={todo.id}
+                                    key={todo._id}
                                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-md"
                                 >
                                     <div className="flex items-center gap-3">
                                         <button
-                                            onClick={() => toggleTodo(todo.id)}
+                                            onClick={() => toggleTodo(todo._id)}
                                             className={`w-5 h-5 rounded border ${todo.completed
                                                 ? 'bg-green-500 border-green-500'
                                                 : 'border-gray-300 dark:border-gray-500'
@@ -210,12 +239,12 @@ export default function Dashboard() {
                                                 {todo.text}
                                             </span>
                                             <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                Due: {todo.deadline.toLocaleDateString()}
+                                                Due: {new Date(todo.deadline).toLocaleDateString()}
                                             </div>
                                         </div>
                                     </div>
                                     <button
-                                        onClick={() => deleteTodo(todo.id)}
+                                        onClick={() => deleteTodo(todo._id)}
                                         className="text-red-500 hover:text-red-600"
                                     >
                                         <FiTrash2 />
