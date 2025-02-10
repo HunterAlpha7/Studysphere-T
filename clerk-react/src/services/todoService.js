@@ -13,16 +13,17 @@ const formatTodoForSubmission = (todo) => ({
 export const todoService = {
     async getTodos(userId) {
         try {
-            const response = await fetch(`${API_URL}/todos/${userId}`);
-            // First check if the response is JSON
-            const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("Response is not JSON");
-            }
+            const response = await fetch(`${API_URL}/todos/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                mode: 'cors'  // Explicitly set CORS mode
+            });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Network response was not ok');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const todos = await response.json();
@@ -32,7 +33,8 @@ export const todoService = {
             }));
         } catch (error) {
             console.error('Error fetching todos:', error);
-            throw error;
+            // Return empty array instead of throwing error
+            return [];
         }
     },
 
